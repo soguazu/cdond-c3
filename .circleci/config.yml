@@ -100,7 +100,7 @@ jobs:
           template: basic_fail_1
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
+          template: basic_success_1
       
 
 workflows:
@@ -117,4 +117,5 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - status:
+          context: slack-secrets
           requires: [build-frontend, build-backend]
