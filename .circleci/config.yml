@@ -90,17 +90,10 @@ jobs:
             cd backend
             npm install
             npm audit fix --audit-level=critical
-  status:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - run: echo "Sending status"
+            exit 1
       - slack/notify:
           event: fail
           template: basic_fail_1
-      - slack/notify:
-          event: pass
-          template: basic_success_1
       
 
 workflows:
