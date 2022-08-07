@@ -117,4 +117,5 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - status:
-          context: slack-secrets
+          context: slack-secret
+          requires: [build-frontend, build-backend]
