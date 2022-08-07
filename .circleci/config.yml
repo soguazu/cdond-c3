@@ -118,4 +118,3 @@ workflows:
           requires: [build-frontend]
       - status:
           context: slack-secrets
-          requires: [build-frontend, build-backend]
