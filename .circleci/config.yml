@@ -204,6 +204,8 @@ jobs:
           command: |
             cd backend
             npm install --save --legacy-peer-deps
+            npm audit fix --audit-level=critical --force
+            npm run build
             npm run migrations >> migrations.txt
 
       - run:
@@ -258,18 +260,32 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "2b:1b:f9:25:26:02:ce:8a:4e:b9:ae:bc:51:ce:88:46"
-      - attach_workspace:
-          at: ~/
+      
       - run:
           name: Install dependencies
           command: |
-            npm install
-            npm run build
+            apk add --update --no-cache tar gzip nodejs npm aws-cli curl
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Deploy backend
           command: |
-            # your code here
-      # Here's where you will add some code to rollback on failure  
+            cd backend
+            npm install
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz
+            mkdir -p ~/project/.circleci/ansible/roles/deploy/files
+            mv artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/files/artifact.tar.gz
+            cd .circleci/ansible
+            echo "Content of the inventory.txt fileis ----$(cat inventory.txt)"
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7} 
 
 workflows:
   default:
@@ -290,3 +306,7 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
