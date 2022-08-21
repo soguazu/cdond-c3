@@ -259,7 +259,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: python:3.7-alpine3.16
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - add_ssh_keys:
@@ -269,7 +269,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update --no-cache tar gzip nodejs npm aws-cli curl
+            sudo apt install -y tar gzip nodejs npm aws-cli curl
       - attach_workspace:
           at: ~/
       - restore_cache:
